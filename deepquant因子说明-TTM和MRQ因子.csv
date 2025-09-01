@@ -1,0 +1,165 @@
+因子名,因子类型,因子说明,因子备注
+comp_code,string,公司ID,自定义的用来识别公司的唯一编码
+report_period,string,截止日期,公司公布报告结束日期
+ann_date,string,公告日期,公告发布当天的日期；有多个阶段的事件，首次披露该事件的日期；该财报首次披露日期；
+or_ttm,double,营业收入(TTM),企业从事主营业务或其他业务所取得的收入(TTM)
+cost_ttm,double,营业成本-非金融类(TTM),非金融企业的营业成本，也称经营成本，指企业所销售商品或者提供劳务的成本(TTM)
+expense_ttm,double,营业支出-金融类(TTM),金融企业经营金融业务所发生的营业支出(TTM)
+gross_margin_ttm,double,毛利(TTM),一般企业营业收入与营业成本之差(TTM)
+operate_income_ttm,double,经营活动净收益(TTM),指企业经营活动产生的收入与成本之间的差额；“经营活动净收益”是 定义的指标，等于企业生产经营收入扣减生产成本和运营成本后的盈利，反映企业实体经营的获利能力；(TTM)
+invest_income_ttm,double,价值变动净收益(TTM),指企业由于公允价值变动、投资及汇兑产生的收益(TTM)
+op_ttm,double,营业利润(TTM),是企业营业收入减去营业成本、期间费用和各种流转税及附加税后的余额，是利润总额的主要来源(TTM)
+ebt_ttm,double,利润总额(TTM),“亏损总额”的对称，企业在一定时期内通过生产经营活动所实现的最终财务成果，是衡量企业经营业绩的一项十分重要的经济指标(TTM)
+profit_ttm,double,净利润(TTM),指企业当期利润总额减去所得税后的金额，即税后利润净利润是企业经营的最终成果(TTM)
+netprofit_ttm,double,归属于母公司的净利润(TTM),归属于母公司所有者的净利润，是反映在企业合并净利润中，归属于母公司股东所有的那部分净利润(TTM)
+gr_ttm,double,营业总收入 (TTM),企业在从事销售商品、提供劳务和让渡资产使用权等日常经营业务过程中所形成的经济利益的总流入(TTM)
+gc_ttm,double,营业总成本 (TTM),公司营业的过程中发生的成本（都和日常经营过程相关），包括直接成本和间接成本，也包括经常性的和偶发性的(TTM)
+cashflow_ttm,double,现金净流量 (TTM),一定时期内，现金及现金等价物的流入减去流出的余额(TTM)
+operate_cashflow_ttm,double,经营活动现金净流量(TTM),即经营活动产生的现金流量净额，是经营活动现金流入与经营活动现金流出之差，该指标可以反映出企业的财务状况(TTM)
+invest_cashflow_ttm,double,投资活动现金净流量(TTM),即投资活动产生的现金流量净额，是投资活动现金流入与投资活动现金流出之差，该指标可以反映出企业的财务状况(TTM)
+finance_cashflow_ttm,double,筹资活动现金净流量(TTM),即筹资活动产生的现金流量净额，是筹资活动现金流入与筹资活动现金流出之差，该指标可以反映出企业的财务状况(TTM)
+asset_mrq,double,资产总计(MRQ),企业最新报告期拥有或控制的能以货币计量的经济资源总和 (MRQ)
+debt_mrq,double,负债合计(MRQ),企业最新报告期所承担的能以资产或劳务偿还的债务总和(MRQ)
+total_equity_mrq,double,股东权益(MRQ),企业最新报告期的净资产值 (MRQ)
+equity_mrq,double,归属于母公司的股东权益 (MRQ),企业最新报告期归属于母公司股东的净资产值(MRQ)
+currency_code,string,货币代码,一国在交易中为了方便而使用的代码
+netprofit_margin_ttm,double,销售净利率 (TTM),企业实现净利润与销售收入的对比关系，用以衡量企业在一定时期的销售收入获取的能力；指净利润与销售收入的百分比，反映整个企业销售收入的收益水平；(TTM)
+gross_profit_margin_ttm,double,销售毛利率 (TTM),毛利占销售净值的百分比；是毛利占销售收入的百分比，反映每1元销售收入扣减生产成本后还有多少盈余可以用来支付企业运营费用并最终形成收益；(TTM)
+expense_to_sales_ttm,double,销售期间费用率(TTM),企业期间费用与销售收入净额之间的比率该指标越低越好，当销售期间费用率大于销售毛利率时，说明企业盈利相当困难；反映生产成本以外的企业运营费用率；(TTM)
+profit_to_gr_ttm,double,净利润/营业总收入(TTM),净利润占营业总收入的比率，可以反映公司的全部经营成果，该比率越大，说明公司的盈利能力越强，；反映企业销售获利率净利润占营业总收入百分比；(TTM)
+operate_expense_to_gr_ttm,double,销售费用/营业总收入(TTM),是一个效率指标，该指标数值越低，说明企业促销工作的效率就越高；销售费用占营业总收入百分比；(TTM)
+admin_expense_to_gr_ttm,double,管理费用/营业总收入(TTM),主要用于评估企业经营效率和管理水平，反映了企业为实现业务目标而付出的成本比例；管理费用占营业总收入百分比；(TTM)
+fina_expense_to_gr_ttm,double,财务费用/营业总收入(TTM),财务费用率，反映了企业业务活动的财务成本是如何影响其总收入的，有助于评估企业的财务风险(TTM)
+impair_to_gr_ttm,double,资产减值损失/营业总收入(TTM),资产减值损失占营业总收入的比重，反映企业资产减值损失的整体情况(TTM)
+gc_to_gr_ttm,double,营业总成本/营业总收入(TTM),主要用于观察主营业务成本是否存在异常波动，还可以直接观察出利润变动的趋势，即指标的数值越大，利润就越少(TTM)
+op_to_gr_ttm,double,营业利润/营业总收入(TTM),即利润率，反映企业一定时期利润水平的相对指标，既可以考核企业利润计划的完成情况，又可比较各企业之间和不同时期的经营管理水平，提高经济效益 (TTM)
+tot_roa_ttm,double,总资产净利率 (TTM),公司净利润与平均资产总额的百分比该指标反映的是公司运用全部资产所获得利润的水平，该指标越高，表明公司投入产出水平越高，资产运营越有效，成本费用的控制水平越高(TTM)
+roa2_ttm,double,总资产报酬率 (TTM),又称资产所得率，指企业一定时期内获得的报酬总额与资产平均总额的比率，用以评价企业运用全部资产的总体获利能力，是评价企业资产运营效益的重要指标 (TTM)
+roe_ttm,double,净资产收益率 (TTM),ROE，是企业净利润与平均净资产的比率，反映所有者权益所获报酬的水平(TTM)
+operate_income_to_ebt_ttm,double,经营活动净收益/利润总额(TTM),判断企业收益质量的指标，企业生产经营收入扣除生产成本和运营成本后的盈利，反映企业实体经营的获利能力(TTM)
+invest_income_to_ebt_ttm,double,价值变动净收益/利润总额(TTM),判断企业收益质量的指标，价值变动净收益反映企业投资获利水平，一般而言，该占比越小越好 (TTM)
+nonoperate_profit_to_ebt_ttm,double,营业外收支净额/利润总额(TTM),营业外收支净额占利润总额的比重，用来衡量企业非日常经营收入所占比重(TTM)
+sales_cash_in_to_or_ttm,double,销售商品提供劳务收到的现金/营业收入(TTM),现金收入比，从现金流入的角度反映销售收入的实际情况，该比率大于1，说明不仅当期收入全部收到现金，而且还收回以前期间的应收账款，盈利质量较好 (TTM)
+ocf_to_or_ttm,double,经营活动产生的现金流量净额/营业收入(TTM),销售现金比，从现金流的角度来评估收入的质量，反映了企业主营业务收入背后现金流量的支持程度比值越高，说明企业当期收入的变现能力越强(TTM)
+ocf_to_operate_income_ttm,double,经营活动产生的现金流量净额/经营活动净收益(TTM),经营活动产生的现金流量净额占经营活动净收益的比重，衡量企业经营收益与现金流入的关系 (TTM)
+deducted_profit_ttm,double,扣除非经常性损益后的净利润(TTM),扣非净利润，反映企业经营业绩的指标，将资本溢价等因素剔除，只看经营利润的高低；扣除与公司正常经营业务无直接关系，以及虽与正常经营业务相关，但由于其性质特殊和偶发性，影响报表使用人对公司经营业绩和盈利能力做出正常判断的各项交易和事项产生的损益后的净利润；(TTM)
+ebit_da_ttm_rev,double,EBITDA(TTM反推法),扣除折旧摊销及所得税、利息费用之前的利润；扣除利息、所得税、折旧与摊销前的盈利；(TTM反推法)
+ebit_da_ttm,double,EBITDA(TTM),扣除折旧摊销及所得税、利息费用之前的利润；扣除利息、所得税、折旧与摊销前的盈利；(TTM)
+ebit_ttm,double,EBIT(TTM),"EBIT,指支付利息和所得税之前的利润；不扣除利息也不扣除所得税的利润；(TTM)"
+roic2_ttm,double,投入资本回报率(TTM),指投出和/或使用资金与相关回报的比例，用于衡量投出资金的使用效果，它是评估企业或其事业部门历史绩效的主要指标，决定着企业的最终价值，也是对公司进行评估的一个最主要的指标 (TTM)
+sales_cashin_ttm,double,销售商品提供劳务收到的现金(TTM),企业通过对商品的销售、提供劳务等方式，获取的现金金额；反映企业本期销售商品、提供劳务收到的现金，以及前期销售商品、提供劳务本期收到的现金（包括销售收入和应向购买者收取的增值税销项税额）和本期预收的款项，减去本期销售本期退回的商品和前期销售本期退回的商品支付的现金；(TTM)
+operate_expense_ttm,double,销售费用(TTM),企业销售商品和材料、提供劳务的过程中发生的各种费用(TTM)
+admin_expense_ttm,double,管理费用(TTM),企业行政管理部门为组织和管理生产经营活动而发生的各种费用 (TTM)
+fina_expense_ttm,double,财务费用(TTM),企业为筹集生产经营所需资金等而发生的费用(TTM)
+expense,double,期间费用(TTM),企业日常活动发生的不能计入特定核算对象的成本，而应计入发生当期损益的费用(TTM)
+nonoperate_profit_ttm,double,营业外收支净额(TTM),营业外收入与营业外支出的差额是企业发生的与其生产经营活动没有直接关系的收入或支出净额 (TTM)
+impairment_ttm,double,资产减值损失 (TTM),因资产的可回收金额低于账面价值而造成的损失新会计准则规定资产减值的范围主要是固定资产、无形资产以及除特别规定外的其他资产减值的处理(TTM)
+ebit_ttm_rev,double,EBIT(TTM反推法),"EBIT,指支付利息和所得税之前的利润(TTM反推法)"
+invest_capital_mrq,double,全部投入资本 (MRQ),股东权益(不含少数股东权益)+负债合计-无息流动负债-无息长期负债(MRQ)
+roic_ttm,double,投入资本回报率ROIC(TTM),指投出和/或使用资金与相关回报的比例，用于衡量投出资金的使用效果，它是评估企业或其事业部门历史绩效的主要指标，决定着企业的最终价值，也是对公司进行评估的一个最主要的指标 (TTM)
+s_stm_bsmrq,double,固定资产合计 (MRQ),企业最新报告期固定资产+在建工程+工程物资+固定资产清理+投资性房地产之和(MRQ)
+nonop_profit_ttm,double,非营业利润 (TTM),企业利润总额与营业利润之差，是指企业除经营活动外所获得的利润(TTM)
+pre_fin_exp_op_ttm,double,扣除财务费用前营业利润 (TTM),即营业利润与财务费用之和 (TTM)
+op_to_ebt_ttm,double,营业利润/利润总额(TTM),营业利润比重反映企业的盈利结构，指标数值高，说明公司主营业务突出，生产经营相对稳定 (TTM)
+nop_to_ebt_ttm,double,非营业利润/利润总额(TTM),营业利润比重反映企业的盈利结构，指标数值高，说明公司非主营业务突出，生产经营可能存在隐患(TTM)
+tax_to_ebt_ttm,double,税项/利润总额(TTM),即企业所得税税率，是企业应纳税额与计税基数之间的数量关系或比率，是企业所得税法的核心 (TTM)
+op_to_or_ttm,double,营业利润/营业收入(TTM),即营业利润率，是衡量企业经营效率的指标，反映了再不考虑非营业成本的情况下，企业管理者通过经营获取利润的能力(TTM)
+ebt_to_or_ttm,double,利润总额/营业收入(TTM),即销售利润率，反映销售收入收益水平的指标，即每元销售收入所获得的利润(TTM)
+pre_fin_expop_to_or_ttm,double,扣除融资费用前营业利润/营业收入(TTM),扣除融资费用前营业利润占利润总额的比重，衡量融资费用对利润总额的影响程度(TTM)
+netprofit_to_or_ttm,double,归属母公司股东的净利润/营业收入(TTM),归属于母公司股东的净利润占营业收入的比重，用以衡量母公司股东在一定时期的销售收入获取情况(TTM)
+pre_fin_expop_to_ebt_ttm,double,扣除融资费用前营业利润/利润总额(TTM),扣除融资费用前营业利润占利润总额的比重，衡量融资费用对利润总额的影响程度(TTM)
+ocf_to_op_ttm,double,经营活动产生的现金流量净额/营业利润(TTM),盈利现金比，用来反映企业的盈利情况(TTM)
+roa_excl_min_int_inc_ttm,double,总资产净利率不含少数股东损益(TTM),总资产净利率扣除不含少数股东损益值(TTM)
+debt_to_assets_mrq,double,资产负债率 (MRQ),企业最新报告期中总负债对总资产的比率，用来衡量企业利用债权人提供资金进行经营活动的能力(MRQ)
+interest_exp_ttm,double,利息支出(TTM),存放在银行里产生的利息税或贷款产生的利息；反映企业（金融）发生的利息支出，包括吸收的各种存款（单位存款、个人存款、信用卡存款、特种存款、转贷款资金等）、与其他金融机构（中央银行、同业等）之间发生资金往来业务、卖出回购金融资产等产生的利息支出；(TTM)
+tax_ttm,double,所得税(TTM),缴纳的企业所得税的金额；指对所有以所得额为课税对象的总称；(TTM)
+minority_interest_ttm,double,少数股东权益 (TTM),合并报表的子公司其他非控股股东享有的损益，需要在利润表中予以扣除的部分； 指公司合并报表的子公司其它非控股股东享有的损益；(TTM)
+cont_net_op_ttm,double,持续经营净利润(TTM),企业正常生产经营产生的净利润的金额；反映净利润中与持续经营相关的净利润该科目按照《企业会计准则第42号——持有待售的非流动资产、处置组和终止经营》的相关规定分别列报；如为净亏损，以“-”号填列；(TTM)
+noncont_net_op_ttm,double,非持续经营净利润(TTM),和公司经营业务无直接关系，以及虽与经营业务相关，但由于其性质、金额或发生评率，影响了真实、公允的反映公司正常盈利能力的各项收入、支出(TTM)
+nonnetopto_taxprofit,double,非持续经营净利润/税后利润(TTM),非持续经营净利润和扣除所得税后的利润比值(TTM)
+netopto_taxprofit,double,持续经营净利润/税后利润(TTM),持续经营净利润和扣除所得税后的利润比值(TTM)
+cur_liab_mrq,double,流动负债(MRQ),流动负债类科目合计值；指企业在一年内或超过一年的一个营业周期内需要偿还的债务；(MRQ)
+cur_assets_mrq,double,流动资产(MRQ),流动资产类科目合计值；指在一年内或者超过一年的一个营业周期内变现或者耗用的资产；(MRQ)
+longterm_liab_mrq,double,长期负债(MRQ),非流动负债合计
+cash_cash_equ_end_period,double,期末现金及现金等价物余额,报表截止日期现金及融资期限为三个月或三个月内的，具有高度流动性且内购赚取利息的投资的余额；企业年末时的现金及现金等价物余额；
+opertax_ttm,double,营业税金及附加(TTM),反应企业经营的主要业务应负担的消费税、资源税、教育附加、城市维护建设税等；反映企业经营主要业务应负担的营业税（已取消）、消费税、城市维护建设税、城镇土地使用税，资源税和教育费附加等；(TTM)
+ttm_growrate_cff,double,同比增长率-筹资活动产生的现金流量净额 (TTM),(本期CFF(TTM)-上年同期CFF(TTM))/ABS(上年同期CFF(TTM))*100
+ttm_growrate_cfo,double,同比增长率-投资活动产生的现金流量净额 (TTM),(本期CFI(TTM)-上年同期CFI(TTM))/ABS(上年同期CFI(TTM))*100
+ttm_growrate_profit,double,同比增长率-净利润(TTM),(本期净利润(TTM)-上年同期净利润(TTM))/ABS(上年同期净利润(TTM))*100
+ttm_growrate_netprofit,double,同比增长率-归属母公司股东的净利润(TTM),(本期归母净利润(TTM)-上年同期归母净利润(TTM))/ABS(上年同期归母净利润(TTM))*100
+ttm_growrate_gm,double,同比增长率-毛利率(TTM),(本期销售毛利率(TTM)-上年同期销售毛利率(TTM))/ABS(上年同期销售毛利率(TTM))*100
+cash_ratio_mrq,double,现金比率(MRQ),期末现金及现金等价物余额/流动负债
+cfotocurliabs,double,现金流动负债比(TTM),CFO(TTM)/流动负债(MRQ)*100
+acca,double,现金流资产比资产回报率 (TTM),(CFO(TTM)-净利润(TTM))*2/(本期资产总计(MRQ)+上年同期资产总计(MRQ))*100
+cur_assets_trate,double,流动资产周转率(TTM),营业总收入(TTM)*2/(本期流动资产(MRQ)+上年同期流动资产(MRQ))
+nat_ttm,double,净资产周转率 (TTM),营业总收入(TTM)*2/(本期股东权益+上年同期股东权益)
+roa_ttm,double,资产回报率 (TTM),净利润(TTM)*2/(本期资产总计(MRQ)+上年同期资产总计(MRQ))*100
+roe2_ttm,double,权益回报率 (TTM),净利润(TTM)*2/(本期股东权益(MRQ)+上年同期股东权益(MRQ))*100
+roc_ttm,double,资本报酬率 (TTM),净利润(TTM)*2/(本期股东权益(MRQ)+本期长期负债(MRQ)+上年同期股东权益(MRQ)+上年同期长期负债(MRQ))*100
+sales_cost_ratio_ttm,double,销售成本率 (TTM),营业成本-非金融类(TTM)/营业收入(TTM)*100
+tax_ratio_ttm,double,销售税金率 (TTM),营业税金及附加(TTM)/营业收入(TTM)*100
+ebit_to_gr,double,息税前利润/营业总收入(TTM),EBIT(TTM)/营业总收入(TTM)*100，其中EBIT，使用反推法=利润总额+nvl（利息支出利息资本化支出-利息收入，财务费用）
+earn_mom,double,八季度净利润变化趋势,统计前8个季度的净利润，如果同比(去年同期)增长记为+1，同比下滑记为-1，再将8个值相加
+prpty_right_ratio,double,产权比率,负债合计/归属母公司股东的权益
+roa_ttm_avg5y,double,5年平均资产回报率,AVG(净利润*2/(本年资产总计(MRQ)+上年末资产总计(MRQ))*100，限定只计算过去五年的年报
+roe_ttm_avg5y,double,5年平均权益回报率,AVG(净利润*2/(本年股东权益(MRQ)+上年末股东权益(MRQ))*100，限定只计算过去五年的年报
+ttm_growrate_op,double,同比增长率-营业利润(TTM),(本期营业利润(TTM)-上年同期营业利润(TTM))/ABS(上年同期营业利润(TTM))*100
+ttm_growrate_cfott,double,同比增长率-经营活动产生的现金流量净额 (TTM),(本期CFO(TTM)-上年同期CFO(TTM))/ABS(上年同期CFO(TTM))*100
+grs_profit_opex_ttm,double,毛利/运营费用(TTM),毛利(TTM)/运营费用(TTM)*100，其中运营费用=销售费用+管理费用+财务费用
+net_cashflow_growth_rate,double,同比增长率-净现金流量(TTM),(本期现金净流量(TTM)-上年同期现金净流量(TTM))/ABS(上年同期现金净流量(TTM))*100
+net_assets_growth_rate,double,同比增长率-净资产,(本期归属母公司股东的权益(MRQ)-上年同期归属母公司股东的权益(MRQ))/ABS(上年同期归属母公司股东的权益(MRQ))*100
+tot_profit_growth_rate,double,同比增长率-利润总额(TTM),(本期利润总额(TTM)-上年同期利润总额(TTM))/ABS(上年同期利润总额(TTM))*100
+income_growth_rate,double,同比增长率-营业收入(TTM),(本期营业收入(TTM)-上年同期营业收入(TTM))/ABS(上年同期营业收入(TTM))*100
+inv_turn_ttm,double,存货周转率 (TTM),营业成本-非金融类(TTM)*2/(期末存货+期初存货)
+fa_turn_ttm,double,固定资产周转率(TTM),营业总收入(TTM)*2/（期末（固定资产+工程物资+在建工程）+期初（固定资产+工程物资+在建工程)）
+acct_payable_ttm,double,应付账款周转率(TTM),营业成本-非金融类(TTM)*2/(期末(应付账款+应付票据+预收款项)+期初(应付账款+应付票据+预收款项)）
+ar_turn_ttm,double,应收账款周转率(TTM),营业收入(TTM)*2/(期末(应收账款+应收票据+预付款项)+期初(应收账款+应收票据+预付款项)）
+assets_turn_ttm,double,总资产周转率 (TTM),营业总收入(TTM)*2/(期末资产总计(MRQ)+期初资产总计(MRQ)）
+inv_turndays,double,存货周转天数,360/存货周转率(TTM)，存货周转率(TTM)为空则不计算
+acct_payable_days,double,应付账款周转天数,360/应付账款周转率(TTM)，应付账款周转率(TTM)为空则不计算
+ar_turndays,double,应收账款周转天数,360/应收账款周转率(TTM)，应收账款周转率(TTM)为空则不计算
+cash_conversion_cycle,double,现金转换周期,应收账款周转天数+存货周转天数-应付账款周转天数，任意一个为空，则不计算
+turn_days,double,营业周期,应收账款周转天数+存货周转天数，任意一个为空，则不计算
+pretax_afttax_profits,double,息前税后利润,EBIT(反推法)*(if?所得税&amp;利润总额都&gt;0，则1-所得税率，否则为1)
+rpc,double,成本费用利润率(TTM),利润总额(TTM)/（营业成本-非金融类(TTM)+销售费用(TTM)+管理费用(TTM)+财务费用(TTM))*100
+ocf_to_debt_ttm,double,经营活动产生的现金流量净额(TTM)/负债合计,经营活动现金净流量(TTM)/期末负债合计
+ocf_to_intrst_debt_ttm,double,经营活动产生现金流量净额(TTM)/带息负债,经营活动现金净流量(TTM)/期末带息债务
+ocf_to_net_debt_ttm,double,经营活动产生现金流量净额(TTM)/净债务,经营活动现金净流量(TTM)/期末净债务
+operate_income_to_ebt,double,经营活动净收益/利润总额,经营活动净收益/利润总额
+tot_assets_growth_rate,double,同比增长率-总资产,(本期资产总计(MRQ)-上年同期资产总计(MRQ))/ABS(上年同期资产总计(MRQ))*100
+book_lever,double,账面杠杆,非流动负债合计/股东权益合计(含少数股东权益)
+tangible_net_value,double,负债合计/有形净值,负债合计/有形资产
+crncy_code,string,交易货币代码,人民币
+total_val_today,double,当日总市值,万元；计算公式：A股股价*总股本（包含B股，H股等，除优先股）
+flow_val_today,double,当日流通市值,万元
+high_52week,double,52周最高价,元
+low_52week,double,52周最低价,元
+val_pe,double,市盈率(PE),倍；总市值/净利润（若净利润<=0，则返回空）当值为负时，做置空处理。
+val_pb_new,double,市净率(PB),倍；总市值/净资产(LF)
+val_pe_ttm,double,"市盈率 (PE,TTM)",倍；总市值/净利润（TTM)
+val_pcf_ocf,double,"市现率(PCF,经营现金流)",倍
+val_pcf_ocf_ttm,double,"市现率(PCF,经营现金流TTM)",倍
+val_pcf_ncf,double,"市现率(PCF,现金净流量)",倍
+val_pcf_ncf_ttm,double,"市现率(PCF,现金净流量TTM)",倍
+val_ps,double,市销率(PS),倍
+val_ps_ttm,double,"市销率 (PS,TTM)",倍
+turn_over,double,换手率,%
+free_turn_over,double,换手率(基准.自由流通股本),%
+tot_shr_today,double,当日总股本,万股
+float_a_shr_today,double,当日流通股本,万股；当日流通A股股本
+close_today,double,当日收盘价,元
+price_div_dps,double,股价/每股派息,倍
+adj_high_52w,double,52周最高价(复权),元
+adj_low_52w,double,52周最低价(复权),元
+free_shares_today,double,当日自由流通股本,万股
+net_profit_parent_comp_ttm,double,归属母公司净利润(TTM),元
+net_profit_parent_comp_lyr,double,归属母公司净利润(LYR),元
+net_assets_today,double,当日净资产,元
+net_cash_flows_oper_act_ttm,double,经营活动产生的现金流量净额(TTM),元
+net_cash_flows_oper_act_lyr,double,经营活动产生的现金流量净额(LYR),元
+oper_rev_ttm,double,营业收入(TTM),元
+oper_rev_lyr,double,营业收入(LYR),元
+net_incr_cash_cash_equ_ttm,double,现金及现金等价物净增加额 (TTM),元
+net_incr_cash_cash_equ_lyr,double,现金及现金等价物净增加额 (LYR),元
+up_down_limit_status,double,涨跌停状态,1表示涨停；0表示非涨停或跌停；-1表示跌停。
+lowest_highest_status,double,最高最低价状态,1表示是历史最高收盘价；0表示非历史最高价或最低价；-1表示是历史最低收盘价。

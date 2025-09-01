@@ -1,0 +1,1456 @@
+from deepquant.quest.apis import *
+
+import talib
+
+
+# 在这个方法中编写任何的初始化逻辑。context对象将会在你的算法策略的任何方法之间做传递
+def init(context):
+    # context内引入全局变量s1，存储目标合约信息
+    context.s1 = 'IF1606'
+
+    # 使用MACD需要设置长短均线和macd平均线的参数
+    context.SHORTPERIOD = 12
+    context.LONGPERIOD = 26
+    context.SMOOTHPERIOD = 9
+    context.OBSERVATION = 50
+
+    # 初始化时订阅合约行情。订阅之后的合约行情会在handle_bar中进行更新
+    subscribe(context.s1)
+
+
+# 你选择的期货数据更新将会触发此段逻辑，例如日线或分钟线更新
+def handle_bar(context, bar_dict):
+    # 开始编写你的主要的算法逻辑
+    # 获取历史收盘价序列，history_bars函数直接返回ndarray，方便之后的有关指标计算
+    prices = history_bars(context.s1, context.OBSERVATION, '1d', 'close')
+
+    # 用Talib计算MACD取值，得到三个时间序列数组，分别为macd,signal 和 hist
+    macd, signal, hist = talib.MACD(prices, context.SHORTPERIOD,
+                                    context.LONGPERIOD, context.SMOOTHPERIOD)
+
+    # macd 是长短均线的差值，signal是macd的均线，如果短均线从下往上突破长均线，为入场信号，进行买入开仓操作
+    if macd[-1] - signal[-1] > 0 and macd[-2] - signal[-2] < 0:
+        sell_qty = get_position(context.s1, POSITION_DIRECTION.SHORT).quantity
+        # 先判断当前卖方仓位，如果有，则进行平仓操作
+        if sell_qty > 0:
+            buy_close(context.s1, 1)
+        # 买入开仓
+        buy_open(context.s1, 1)
+
+    if macd[-1] - signal[-1] < 0 and macd[-2] - signal[-2] > 0:
+        buy_qty = get_position(context.s1, POSITION_DIRECTION.LONG).quantity
+        # 先判断当前买方仓位，如果有，则进行平仓操作
+        if buy_qty > 0:
+            sell_close(context.s1, 1)
+        # 卖出开仓
+        sell_open(context.s1, 1)
+
+
+from deepquant.quest.apis import *
+
+
+# 在这个方法中编写任何的初始化逻辑。context对象将会在你的算法策略的任何方法之间做传递。
+def init(context):
+    logger.info("init")
+    context.s1 = "000001.SZ"
+    update_universe(context.s1)
+    # 是否已发送了order
+    context.fired = False
+
+
+def before_trading(context):
+    pass
+
+
+# 你选择的证券的数据更新将会触发此段逻辑，例如日或分钟历史数据切片或者是实时数据切片更新
+def handle_bar(context, bar_dict):
+    # 开始编写你的主要的算法逻辑
+
+    # bar_dict[market_code] 可以拿到某个证券的bar信息
+    # context.portfolio 可以拿到现在的投资组合状态信息
+
+    # 使用order_shares(id_or_ins, amount)方法进行落单
+
+    # TODO: 开始编写你的算法吧！
+    if not context.fired:
+        # order_percent并且传入1代表买入该股票并且使其占有投资组合的100%
+        order_percent(context.s1, 1)
+        context.fired = True
+
+# encoding: utf-8
+from deepquant.quest.alpha.apis import *
+import deepquant.quest.datac as yhdatac
+from deepquant import gid
+
+
+
+__config__ = {
+    "base": {
+        "data_bundle_path": "D:/sendData/ricequant/bundle",
+        "start_date": '2022-09-25',  # 回测起始日期
+        "end_date": '2023-10-25',  # 回测结束日期
+        'frequency': '1d',
+        "accounts": {
+            "stock": 10000000
+        },
+    },
+    "mod": {
+        "sys_analyser": {
+            # 策略基准，该基准将用于风险指标计算和收益曲线图绘制
+            #   若基准为单指数/股票，此处直接设置 market_code，如："000300.SH"
+            #   若基准为复合指数，则需传入 market_code 和权重构成的字符串，如："000300.SH:0.2,000905.SH:0.8"
+            "benchmark": None,
+            # 当不输出 csv/pickle/plot 等内容时，关闭该项可关闭策略运行过程中部分收集数据的逻辑，用以提升性能
+            "record": True,
+            # 策略名称，可设置 summary 报告中的 strategy_name 字段，并展示在 plot 回测结果图中
+            "strategy_name": None,
+            # 回测结果输出的文件路径，该文件为 pickle 格式，内容为每日净值、头寸、流水及风险指标等；若不设置则不输出该文件
+            "output_file": None,
+            # 回测报告的数据目录，报告为 csv 格式；若不设置则不输出报告
+            "report_save_path": './backtest',
+            # 是否在回测结束后绘制收益曲线图
+            'plot': False,
+            # 收益曲线图路径，若设置则将收益曲线图保存为 png 文件
+            'plot_save_file': None,
+            # 收益曲线图设置
+            'plot_config': {
+                # 是否在收益图中展示买卖点
+                'open_close_points': False,
+                # 是否在收益图中展示周度指标和收益曲线
+                'weekly_indicators': False
+            },
+        },
+        "sys_accounts": {
+            # 是否开启股票 T+1 限制
+            "stock_t1": True,
+            # 是否开启自动分红再投资
+            "dividend_reinvestment": False,
+            # 当持仓股票退市时，是否按照退市价格返还现金
+            "cash_return_by_stock_delisted": True,
+            # 股票下单因资金不足被拒时改为使用全部剩余资金下单
+            "auto_switch_order_value": False,
+            # 开启对股票仓位是否能满足平仓需求的检查
+            "validate_stock_position": True,
+            # 开启对期货仓位是否能满足平仓需求的检查
+            "validate_future_position": True,
+            # 融资利率/年
+            "financing_rate": 0.00,
+            # 是否开启融资可买入股票的限制
+            "financing_stocks_restriction_enabled": False,
+            # 逐日盯市结算价: settlement/close
+            "futures_settlement_price_type": "close",
+        },
+        "sys_simulation": {
+            # 撮合方式，其中：
+            #   日回测的可选值为 "current_bar"|"vwap"（以当前 bar 收盘价｜成交量加权平均价撮合）
+            #   分钟回测的可选值有 "current_bar"|"next_bar"|"vwap"（以当前 bar 收盘价｜下一个 bar 的开盘价｜成交量加权平均价撮合)
+            #   tick 回测的可选值有 "last"|"best_own"|"best_counterparty"（以最新价｜己方最优价｜对手方最优价撮合）和 "counterparty_offer"（逐档撮合）
+            #   matching_type 为 None 则表示根据回测频率自动选择。日/分钟回测下为 current_bar , tick 回测下为 last
+            "matching_type": None,
+            # 开启对于处于涨跌停状态的证券的撮合限制
+            "price_limit": True,
+            # 开启对于对手盘无流动性的证券的撮合限制（仅在 tick 回测下生效）
+            "liquidity_limit": False,
+            # 开启成交量限制
+            #   开启该限制意味着每个 bar 的累计成交量将不会超过该时间段内市场上总成交量的一定比值（volume_percent）
+            #   开启该限制意味着每个 tick 的累计成交量将不会超过当前tick与上一个tick的市场总成交量之差的一定比值
+            "volume_limit": False,
+            # 每个 bar/tick 可成交数量占市场总成交量的比值，在 volume_limit 开启时生效
+            "volume_percent": 0.25,
+            # 滑点模型，可选值有 "PriceRatioSlippage"（按价格比例设置滑点）和 "TickSizeSlippage"（按跳设置滑点）
+            #    亦可自己实现滑点模型，选择自己实现的滑点模型时，此处需传入包含包和模块的完整类路径
+            #    滑点模型类需继承自 yhalpha.mod.mod_sys_simulation.slippage.BaseSlippage
+            "slippage_model": "PriceRatioSlippage",
+            # 设置滑点值，对于 PriceRatioSlippage 表示价格的比例，对于 TickSizeSlippage 表示跳的数量
+            "slippage": 0.001,
+        },
+        # 费用模块，该模块的配置项用于调整交易的税费
+        "sys_transaction_cost": {
+            # 股票最小手续费，单位元
+            "cn_stock_min_commission": 5,
+            # 股票佣金倍率,即在默认的手续费率基础上按该倍数进行调整，股票的默认佣金为万八
+            "stock_commission_multiplier": 1,
+            # 期货佣金倍率,即在默认的手续费率基础上按该倍数进行调整，期货默认佣金因合约而异
+            "futures_commission_multiplier": 1,
+            # 印花倍率，即在默认的印花税基础上按该倍数进行调整，股票默认印花税为万分之五，单边收取
+            "tax_multiplier": 1,
+            # 是否使用回测当时时间点对应的真实印花税率
+            "pit_tax": False,
+        },
+        "option" : {
+            "enabled" : False
+        },
+        "convertible" : {
+            "enabled" : False
+        },
+        "spot" : {
+            "enabled" : False
+        },
+        "fund" : {
+            "enabled" : False
+        },
+    },
+    "extra": {
+        # 系统日志级别，用于控制策略框架输出日志的详细程度（策略打印的日志不受该选项控制），设置为某一级别则框架会输出该级别及更"严重"的日志
+        # 可选值："debug"|"info"|"warning"|"error"，通常推荐设置为 info 或 warning
+        # error 日志一般为不可逆的错误，如策略抛出异常、加载 Mod 失败等
+        # warning 日志一般为告警信息，如 API 废弃、订单创建失败等
+        # info 日志一般为说明性的信息，如 Mod 在某种设置下被动关闭等
+        # debug 日志一般为开发者关注的调试信息，如策略状态变更、事件触发等，用户通常不需要关注
+        "log_level": "info",
+        # 是否开启性能分析
+        "enable_profiler": False,
+        # 输出的日志文件路径
+        "log_file": None,
+    }
+}
+
+
+def order_event(context, event):
+    print(event.event_type, event.market_code, event.reason)
+
+
+def init(context):
+    # 定义标
+    # CS ETF Convertible Future option
+    context.market_code = ['000001.SZ']
+    print(get_price(market_code=['000001.SZ','600000.SH'], start_date="2022-01-01"))
+    #yhdatac.get_suspend_days(market_code=['000001.SZ','600000.SH'], start_date="2005-01-01", end_date="2024-01-01")
+    #print(get_industry("农业"))
+    #print(concept('民营医院', '国企改革'))
+    """
+    事件类型：
+        ORDER_PENDING_NEW
+        订单创建成功
+        ORDER_CREATION_PASS
+        订单已报
+        ORDER_CREATION_REJECT
+        订单创建被拒
+        ORDER_PENDING_CANCEL
+        订单待撤
+        ORDER_CANCELLATION_PASS
+        订单撤单成功
+        ORDER_CANCELLATION_REJECT
+        订单撤单被拒
+        ORDER_UNSOLICITED_UPDATE
+        订单已报被拒
+        TRADE
+        成交
+    """
+    subscribe_event(EVENT.ORDER_CREATION_REJECT, order_event)
+    context.count = 1
+
+
+# 开盘集合竞价
+def open_auction(context, bar_dict):
+    if context.count == 1:
+        print(bar_dict[context.market_code[0]].low_limited)
+        order_shares(context.market_code[0], 1000)
+
+
+# 盘前处理
+def before_trading(context):
+    if context.count == 1:
+        price_df = history_bars(context.market_code[0], 10, frequency="1d")  # 历史数据的拉取
+        #factor_df = get_factor(context.market_code[0], 'MA30', 1)  # 获取因子
+        #print(price_df, factor_df)
+
+
+def handle_bar(context, bar_dict):
+    print("handle_bar.....", str(bar_dict), bar_dict.__len__())
+    print(bar_dict[context.market_code[0]])
+    print(bar_dict[context.market_code[0]].open)
+
+    if context.count == 1:
+        deposit('STOCK', 10000)  # 盘前股票账户入金10000
+        #deposit('FUTURE', 10000)  # 盘前期货账户入金10000
+        withdraw('STOCK', 10000)  # 盘前股票账户出金10000
+        #withdraw('FUTURE', 10000)  # 盘前期货账户出金10000
+        print(f'订单数量：{get_open_orders()}')
+        #order_shares(context.market_code[0], 1000, TWAPOrder(931, 945))  # 按数量下单（twap算法単）
+        #order_shares(context.market_code[0], 1000, VWAPOrder(931, 945))  # 按数量下单（vwap算法単）
+        order_target_value(context.market_code[0], 50000)  # 将000001.SZ调仓到市值为50000（按目标金额下单）
+        order_target_percent(context.market_code[0], 0.4)  # 如果投资组合中已经有了平安银行股票的仓位，并且占据目前投资组合的30%的价值，那么以下代码会消耗相当于当前投资组合价值10%的现金买入平安银行股票（按目标数量下单）
+        '''
+        order_shares(context.market_code[1], 1000)  # 按数量下单
+        order_shares(context.market_code[2], 1000)  # 按数量下单
+        order_value(context.market_code[0], 10000)  # 按金额下单
+        order_value(context.market_code[1], 10000)  # 按金额下单
+        order_value(context.market_code[2], 10000)  # 按金额下单
+
+        buy_open(context.market_code[3], 1)  # 做多一手期货
+        buy_open(context.market_code[4], 1)  # 做多一手期货
+        sell_open(context.market_code[3], 1)  # 做空一手期权
+        sell_open(context.market_code[4], 1)  # 做空一手期权
+        '''
+
+# 盘后处理
+def after_trading(context):
+    if context.count == 1:
+        for p in get_positions():
+            print(f'{p.market_code} 持仓: {p.quantity}')
+        print(f'可用资金: {context.stock_account.cash}')
+    context.count += 1
+
+
+if __name__ == '__main__':
+    from deepquant.quest.alpha import run_func
+
+    # 初始化deepquant
+    gid.init('gidtest', 'gid#2024')
+
+    data = run_func(init=init, before_trading=before_trading, after_trading=after_trading, handle_bar=handle_bar,
+                    config=__config__, open_auction=open_auction)
+
+from deepquant.quest.apis import *
+
+import talib
+
+
+# 在这个方法中编写任何的初始化逻辑。context对象将会在你的算法策略的任何方法之间做传递。
+def init(context):
+    context.s1 = "000001.SZ"
+
+    # 设置这个策略当中会用到的参数，在策略中可以随时调用，这个策略使用长短均线，我们在这里设定长线和短线的区间，在调试寻找最佳区间的时候只需要在这里进行数值改动
+    context.SHORTPERIOD = 20
+    context.LONGPERIOD = 120
+
+
+# 你选择的证券的数据更新将会触发此段逻辑，例如日或分钟历史数据切片或者是实时数据切片更新
+def handle_bar(context, bar_dict):
+    # 开始编写你的主要的算法逻辑
+    # bar_dict[market_code] 可以拿到某个证券的bar信息
+    # context.portfolio 可以拿到现在的投资组合状态信息
+
+    # 使用order_shares(id_or_ins, amount)方法进行落单
+
+    # TODO: 开始编写你的算法吧！
+
+    # 因为策略需要用到均线，所以需要读取历史数据
+    prices = history_bars(context.s1, context.LONGPERIOD+1, '1d', 'close')
+
+    # 使用talib计算长短两根均线，均线以array的格式表达
+    short_avg = talib.SMA(prices, context.SHORTPERIOD)
+    long_avg = talib.SMA(prices, context.LONGPERIOD)
+
+    plot("short avg", short_avg[-1])
+    plot("long avg", long_avg[-1])
+
+    # 计算现在portfolio中股票的仓位
+    cur_position = get_position(context.s1).quantity
+    # 计算现在portfolio中的现金可以购买多少股票
+    shares = context.portfolio.cash / bar_dict[context.s1].close_price
+
+    # 如果短均线从上往下跌破长均线，也就是在目前的bar短线平均值低于长线平均值，而上一个bar的短线平均值高于长线平均值
+    if short_avg[-1] - long_avg[-1] < 0 and short_avg[-2] - long_avg[-2] > 0 and cur_position > 0:
+        # 进行清仓
+        order_target_value(context.s1, 0)
+
+    # 如果短均线从下往上突破长均线，为入场信号
+    if short_avg[-1] - long_avg[-1] > 0 and short_avg[-2] - long_avg[-2] < 0:
+        # 满仓入股
+        order_shares(context.s1, shares)
+
+from deepquant.quest.apis import *
+
+import talib
+
+
+# 在这个方法中编写任何的初始化逻辑。context对象将会在你的算法策略的任何方法之间做传递。
+def init(context):
+    context.s1 = "000001.SZ"
+
+    # 使用MACD需要设置长短均线和macd平均线的参数
+    context.SHORTPERIOD = 12
+    context.LONGPERIOD = 26
+    context.SMOOTHPERIOD = 9
+    context.OBSERVATION = 100
+
+
+# 你选择的证券的数据更新将会触发此段逻辑，例如日或分钟历史数据切片或者是实时数据切片更新
+def handle_bar(context, bar_dict):
+    # 开始编写你的主要的算法逻辑
+
+    # bar_dict[market_code] 可以拿到某个证券的bar信息
+    # context.portfolio 可以拿到现在的投资组合状态信息
+
+    # 使用order_shares(id_or_ins, amount)方法进行落单
+
+    # TODO: 开始编写你的算法吧！
+
+    # 读取历史数据，使用sma方式计算均线准确度和数据长度无关，但是在使用ema方式计算均线时建议将历史数据窗口适当放大，结果会更加准确
+    prices = history_bars(context.s1, context.OBSERVATION, '1d', 'close')
+
+    # 用Talib计算MACD取值，得到三个时间序列数组，分别为macd, signal 和 hist
+    macd, signal, hist = talib.MACD(prices, context.SHORTPERIOD,
+                                    context.LONGPERIOD, context.SMOOTHPERIOD)
+
+    plot("macd", macd[-1])
+    plot("macd signal", signal[-1])
+
+    # macd 是长短均线的差值，signal是macd的均线，使用macd策略有几种不同的方法，我们这里采用macd线突破signal线的判断方法
+
+    # 如果macd从上往下跌破macd_signal
+
+    if macd[-1] - signal[-1] < 0 and macd[-2] - signal[-2] > 0:
+        # 计算现在portfolio中股票的仓位
+        curPosition = get_position(context.s1).quantity
+        # 进行清仓
+        if curPosition > 0:
+            order_target_value(context.s1, 0)
+
+    # 如果短均线从下往上突破长均线，为入场信号
+    if macd[-1] - signal[-1] > 0 and macd[-2] - signal[-2] < 0:
+        # 满仓入股
+        order_target_percent(context.s1, 1)
+
+# encoding: utf-8
+from deepquant.quest.apis import *
+
+
+__config__ = {
+    "base": {
+        "data_bundle_path": "D:/sendData/ricequant/bundle",
+        "start_date": '2023-09-25',  # 回测起始日期
+        "end_date": '2023-10-25',  # 回测结束日期
+        'frequency': '1m',
+        "accounts": {
+            "stock": 10000000
+        },
+    },
+    "mod": {
+        "option" : {
+            "enabled" : False
+        },
+        "convertible" : {
+            "enabled" : False
+        },
+        "spot" : {
+            "enabled" : False
+        },
+        "fund" : {
+            "enabled" : False
+        },
+    },
+}
+
+
+def init(context):
+    # 定义标
+    # CS ETF Convertible Future option
+    context.market_code = ['000001.SZ']
+    for market_code in context.market_code:
+        """
+            在日级别回测中不需要订阅合约。
+            在分钟回测中，若策略只设置了股票账户则不需要订阅合约；若设置了期货账户，则需要订阅策略关注的期货合约，
+            框架会根据订阅的期货合约品种触发对应交易时间的 handle_bar。为了方便起见，也可以以直接订阅主力连续合约。
+            在 tick 回测中，策略需要订阅每一个关注的股票/期货合约，框架会根据订阅池触发对应标的的 handle_tick
+        """
+        subscribe(market_code)  # 订阅行情
+        context.fired = False
+
+
+# 盘前处理
+def before_trading(context):
+    pass
+
+
+def handle_bar(context, bar_dict):
+    print("handle_bar.....", str(bar_dict), bar_dict.__len__())
+    print(bar_dict[context.market_code[0]])
+    if not context.fired:
+        order_target_value(context.market_code[0], 50000)  # 将000001.SZ调仓到市值为50000（按目标金额下单）
+        order_target_percent(context.market_code[0], 0.4)  # 如果投资组合中已经有了平安银行股票的仓位，并且占据目前投资组合的30%的价值，那么以下代码会消耗相当于当前投资组合价值10%的现金买入平安银行股票（按目标数量下单）
+        #order_shares(context.market_code[1], 1000)  # 按数量下单
+        #order_shares(context.market_code[2], 1000)  # 按数量下单
+        order_value(context.market_code[0], 10000)  # 按金额下单
+        #order_value(context.market_code[1], 10000)  # 按金额下单
+        #order_value(context.market_code[2], 10000)  # 按金额下单
+        #buy_open(context.market_code[3], 1)  # 做多一手期货
+        #buy_open(context.market_code[4], 1)  # 做多一手期货
+        #sell_open(context.market_code[3], 1)  # 做空一手期权
+        #sell_open(context.market_code[4], 1)  # 做空一手期权
+        context.fired = True
+
+
+# 盘后处理
+def after_trading(context):
+    pass
+
+
+if __name__ == '__main__':
+    from deepquant.quest.alpha import run_func
+    data = run_func(init=init, before_trading=before_trading, after_trading=after_trading, handle_bar=handle_bar, config=__config__)
+
+import numpy as np
+
+
+# 在这个方法中编写任何的初始化逻辑。context对象将会在你的算法策略的任何方法之间做传递。
+def init(context):
+    context.s1 = 'AG1612'
+    context.s2 = 'AU1612'
+
+    # 设置全局计数器
+    context.counter = 0
+
+    # 设置滚动窗口
+    context.window = 60
+
+    # 设置对冲手数,通过研究历史数据进行价格序列回归得到该值
+    context.ratio = 15
+
+    context.up_cross_up_limit = False
+    context.down_cross_down_limit = False
+
+    # 设置入场临界值
+    context.entry_score = 2
+
+    # 初始化时订阅合约行情。订阅之后的合约行情会在handle_bar中进行更新
+    subscribe([context.s1, context.s2])
+
+
+# before_trading此函数会在每天交易开始前被调用，当天只会被调用一次
+def before_trading(context):
+    # 样例商品期货在回测区间内有夜盘交易,所以在每日开盘前将计数器清零
+    context.counter = 0
+
+
+# 你选择的期货数据更新将会触发此段逻辑，例如日线或分钟线更新
+def handle_bar(context, bar_dict):
+
+    # 获取当前一对合约的仓位情况。如尚未有仓位,则对应持仓量都为0
+    long_pos_a = get_position(context.s1, POSITION_DIRECTION.LONG)
+    short_pos_a = get_position(context.s1, POSITION_DIRECTION.SHORT)
+    long_pos_b = get_position(context.s2, POSITION_DIRECTION.LONG)
+    short_pos_b = get_position(context.s2, POSITION_DIRECTION.SHORT)
+
+    context.counter += 1
+    # 当累积满一定数量的bar数据时候,进行交易逻辑的判断
+    if context.counter > context.window:
+
+        # 获取当天历史分钟线价格队列
+        price_array_a = history_bars(context.s1, context.window, '1m', 'close')
+        price_array_b = history_bars(context.s2, context.window, '1m', 'close')
+
+        # 计算价差序列、其标准差、均值、上限、下限
+        spread_array = price_array_a - context.ratio * price_array_b
+        std = np.std(spread_array)
+        mean = np.mean(spread_array)
+        up_limit = mean + context.entry_score * std
+        down_limit = mean - context.entry_score * std
+
+        # 获取当前bar对应合约的收盘价格并计算价差
+        price_a = bar_dict[context.s1].close_price
+        price_b = bar_dict[context.s2].close_price
+        spread = price_a - context.ratio * price_b
+
+        # 如果价差低于预先计算得到的下限,则为建仓信号,'买入'价差合约
+        if spread <= down_limit and not context.down_cross_down_limit:
+            # 可以通过logger打印日志
+            logger.info('spread: {}, mean: {}, down_limit: {}'.format(spread, mean, down_limit))
+            logger.info('创建买入价差中...')
+
+            # 获取当前剩余的应建仓的数量
+            qty_a = 1 - long_pos_a.quantity
+            qty_b = context.ratio - short_pos_b.sell_quantity
+
+            # 由于存在成交不超过下一bar成交量25%的限制,所以可能要通过多次发单成交才能够成功建仓
+            if qty_a > 0:
+                buy_open(context.s1, qty_a)
+            if qty_b > 0:
+                sell_open(context.s2, qty_b)
+            if qty_a == 0 and qty_b == 0:
+                # 已成功建立价差的'多仓'
+                context.down_cross_down_limit = True
+                logger.info('买入价差仓位创建成功!')
+
+        # 如果价差向上回归移动平均线,则为平仓信号
+        if spread >= mean and context.down_cross_down_limit:
+            logger.info('spread: {}, mean: {}, down_limit: {}'.format(spread, mean, down_limit))
+            logger.info('对买入价差仓位进行平仓操作中...')
+
+            # 由于存在成交不超过下一bar成交量25%的限制,所以可能要通过多次发单成交才能够成功建仓
+            qty_a = long_pos_a.quantity
+            qty_b = short_pos_b.quantity
+            if qty_a > 0:
+                sell_close(context.s1, qty_a)
+            if qty_b > 0:
+                buy_close(context.s2, qty_b)
+            if qty_a == 0 and qty_b == 0:
+                context.down_cross_down_limit = False
+                logger.info('买入价差仓位平仓成功!')
+
+        # 如果价差高于预先计算得到的上限,则为建仓信号,'卖出'价差合约
+        if spread >= up_limit and not context.up_cross_up_limit:
+            logger.info('spread: {}, mean: {}, up_limit: {}'.format(spread, mean, up_limit))
+            logger.info('创建卖出价差中...')
+            qty_a = 1 - short_pos_a.quantity
+            qty_b = context.ratio - long_pos_b.quantity
+            if qty_a > 0:
+                sell_open(context.s1, qty_a)
+            if qty_b > 0:
+                buy_open(context.s2, qty_b)
+            if qty_a == 0 and qty_b == 0:
+                context.up_cross_up_limit = True
+                logger.info('卖出价差仓位创建成功')
+
+        # 如果价差向下回归移动平均线,则为平仓信号
+        if spread < mean and context.up_cross_up_limit:
+            logger.info('spread: {}, mean: {}, up_limit: {}'.format(spread, mean, up_limit))
+            logger.info('对卖出价差仓位进行平仓操作中...')
+            qty_a = short_pos_a.quantity
+            qty_b = long_pos_b.quantity
+            if qty_a > 0:
+                buy_close(context.s1, qty_a)
+            if qty_b > 0:
+                sell_close(context.s2, qty_b)
+            if qty_a == 0 and qty_b == 0:
+                context.up_cross_up_limit = False
+                logger.info('卖出价差仓位平仓成功!')
+
+from deepquant.quest.apis import *
+
+import talib
+
+
+# 在这个方法中编写任何的初始化逻辑。context对象将会在你的算法策略的任何方法之间做传递。
+def init(context):
+
+    # 选择我们感兴趣的股票
+    context.s1 = "000001.SZ"
+    context.s2 = "601988.SH"
+    context.s3 = "000068.SZ"
+    context.stocks = [context.s1, context.s2, context.s3]
+
+    context.TIME_PERIOD = 14
+    context.HIGH_RSI = 85
+    context.LOW_RSI = 30
+    context.ORDER_PERCENT = 0.3
+
+
+# 你选择的证券的数据更新将会触发此段逻辑，例如日或分钟历史数据切片或者是实时数据切片更新
+def handle_bar(context, bar_dict):
+    # 开始编写你的主要的算法逻辑
+
+    # bar_dict[market_code] 可以拿到某个证券的bar信息
+    # context.portfolio 可以拿到现在的投资组合状态信息
+
+    # 使用order_shares(id_or_ins, amount)方法进行落单
+
+    # TODO: 开始编写你的算法吧！
+
+    # 对我们选中的股票集合进行loop，运算每一只股票的RSI数值
+    for stock in context.stocks:
+        # 读取历史数据
+        prices = history_bars(stock, context.TIME_PERIOD+1, '1d', 'close')
+
+        # 用Talib计算RSI值
+        rsi_data = talib.RSI(prices, timeperiod=context.TIME_PERIOD)[-1]
+
+        cur_position = get_position(stock).quantity
+        # 用剩余现金的30%来购买新的股票
+        target_available_cash = context.portfolio.cash * context.ORDER_PERCENT
+
+        # 当RSI大于设置的上限阀值，清仓该股票
+        if rsi_data > context.HIGH_RSI and cur_position > 0:
+            order_target_value(stock, 0)
+
+        # 当RSI小于设置的下限阀值，用剩余cash的一定比例补仓该股
+        if rsi_data < context.LOW_RSI:
+            logger.info("target available cash caled: " + str(target_available_cash))
+            # 如果剩余的现金不够一手 - 100shares，那么会被ricequant 的order management system reject掉
+            order_value(stock, target_available_cash)
+# -*- coding: utf-8 -*-
+
+from deepquant.quest import run_code
+
+code = """
+from deepquant.quest.apis import *
+
+
+def init(context):
+    logger.info("init")
+    context.s1 = "000001.SZ"
+    update_universe(context.s1)
+    context.fired = False
+
+
+def before_trading(context):
+    pass
+
+
+def handle_bar(context, bar_dict):
+    if not context.fired:
+        # order_percent并且传入1代表买入该股票并且使其占有投资组合的100%
+        order_percent(context.s1, 1)
+        context.fired = True
+"""
+
+config = {
+  "base": {
+    "start_date": "2016-06-01",
+    "end_date": "2016-12-01",
+    "benchmark": "000300.SH",
+    "accounts": {
+      "stock": 100000
+    }
+  },
+  "extra": {
+    "log_level": "verbose",
+  },
+  "mod": {
+    "sys_analyser": {
+      "enabled": True,
+      "plot": False
+    }
+  }
+}
+
+run_code(code, config)
+
+# -*- coding: utf-8 -*-
+
+from deepquant.quest import run_file
+
+config = {
+  "base": {
+    "start_date": "2016-06-01",
+    "end_date": "2016-12-01",
+    "benchmark": "000300.SH",
+    "accounts": {
+      "stock": 100000
+    }
+  },
+  "extra": {
+    "log_level": "verbose",
+  },
+  "mod": {
+    "sys_analyser": {
+      "enabled": True,
+      "plot": True
+    }
+  }
+}
+
+strategy_file_path = "./buy_and_hold.py"
+
+run_file(strategy_file_path, config)
+
+# -*- coding: utf-8 -*-
+
+from deepquant.quest.apis import *
+from deepquant.quest import run_func
+
+
+def init(context):
+    logger.info("init")
+    context.s1 = "000001.SZ"
+    update_universe(context.s1)
+    context.fired = False
+
+
+def before_trading(context):
+    pass
+
+
+def handle_bar(context, bar_dict):
+    if not context.fired:
+        # order_percent并且传入1代表买入该股票并且使其占有投资组合的100%
+        order_percent(context.s1, 1)
+        context.fired = True
+
+
+config = {
+  "base": {
+    "start_date": "2016-06-01",
+    "end_date": "2016-12-01",
+    "benchmark": "000300.SH",
+    "accounts": {
+      "stock": 100000
+    }
+  },
+  "extra": {
+    "log_level": "verbose",
+  },
+  "mod": {
+    "sys_analyser": {
+      "enabled": True,
+      "plot": True
+    }
+  }
+}
+
+# 您可以指定您要传递的参数
+run_func(init=init, before_trading=before_trading, handle_bar=handle_bar, config=config)
+
+# 如果你的函数命名是按照 API 规范来，则可以直接按照以下方式来运行
+# run_func(**globals())
+
+# 单股票买入并持有策略（日级别）
+
+from deepquant.quest import run_func
+from deepquant.quest.apis import *
+
+
+FREQUENCY = "1d" # 策略的频率，该策略可选为 1d, 1m
+
+__config__ = {
+    "base": {
+        "data_bundle_path": "D:/sendData/ricequant/bundle",
+        "start_date": "2023-01-04",
+        "end_date": "2024-01-04",
+        "frequency": FREQUENCY,
+        "accounts": {
+            "stock": 10000000
+        }
+    }
+}
+
+
+def init(context):
+    context.s1 = "000001.SZ"
+    context.fired = False
+
+
+def handle_bar(context, bar_dict):
+    print("###receive bar...", bar_dict)
+    if not context.fired:
+        order_shares(context.s1, 1000)
+        context.fired = True
+
+
+run_func(config=__config__, init=init, handle_bar=handle_bar)
+from deepquant.quest.apis import *
+
+
+def on_trade_handler(event):
+    trade = event.trade
+    order = event.order
+    account = event.account
+    logger.info("*" * 10 + "Trade Handler" + "*" * 10)
+    logger.info(trade)
+    logger.info(order)
+    logger.info(account)
+
+
+def on_order_handler(event):
+    order = event.order
+    logger.info("*" * 10 + "Order Handler" + "*" * 10)
+    logger.info(order)
+
+
+# 在这个方法中编写任何的初始化逻辑。context对象将会在你的算法策略的任何方法之间做传递。
+def init(context):
+    logger.info("init")
+    context.s1 = "000001.SZ"
+    update_universe(context.s1)
+    # 是否已发送了order
+    context.fired = False
+    subscribe_event(EVENT.TRADE, on_trade_handler)
+    subscribe_event(EVENT.ORDER_CREATION_PASS, on_order_handler)
+
+
+def before_trading(context):
+    pass
+
+
+# 你选择的证券的数据更新将会触发此段逻辑，例如日或分钟历史数据切片或者是实时数据切片更新
+def handle_bar(context, bar_dict):
+    # 开始编写你的主要的算法逻辑
+
+    # bar_dict[market_code] 可以拿到某个证券的bar信息
+    # context.portfolio 可以拿到现在的投资组合状态信息
+
+    # 使用order_shares(id_or_ins, amount)方法进行落单
+
+    # TODO: 开始编写你的算法吧！
+    if not context.fired:
+        # order_percent并且传入1代表买入该股票并且使其占有投资组合的100%
+        order_percent(context.s1, 1)
+        context.fired = True
+
+# yhalpha run -f ./yhalpha/examples/subscribe_event.py -s 2016-06-01 -e 2016-12-01 --stock-starting-cash 100000 --benchmark 000300.SH
+#!/usr/bin/python3
+# encoding: utf-8 
+# @Time    : 2020/4/20 14:54
+# @author  : zza
+# @Email   : 740713651@qq.com
+# @File    : __init__.py
+import os
+import unittest
+import warnings
+from unittest.mock import Mock
+
+from click.testing import CliRunner
+
+import deepquant.quest.sdk as yhsdk
+from deepquant import gid
+
+gid.init('gidtest', 'gid#2024')
+
+
+class TestUpdate(unittest.TestCase):
+
+    def setUp(self):
+        def side_effect(*args):
+            print(*args)
+            return args
+
+        yhsdk.cmds.pip_install = Mock(side_effect=side_effect)
+    '''
+    def test_update_with_no_product(self):
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.update, [])
+        output = result.output
+        self.assertIn("yhsdk", output, "不包含yhsdk")
+        self.assertIn("https://pypi.tuna.tsinghua.edu.cn/simple/\n", output, "默认清华源")
+
+    def test_update_with_i(self):
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.update, ["-i https://py.ricequant.com/simple/"])
+        output = result.output
+        self.assertTrue(output.endswith("https://py.ricequant.com/simple/\n"), "参数无效")
+
+    def test_update_with_error_product(self):
+        from deepquant.quest.sdk.const import PRODUCTS
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.update, ["rqdata"])
+        output = result.output
+        out_str = "PRODUCT可选为:{}\n,当前为{}。".format(PRODUCTS, "rqdata")
+        self.assertIn(out_str, output, "产品参数错误提示错误")
+'''
+    def test_update_data(self):
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.update_data, ["-dD:/sendData/ricequant/", "--base"])
+        output = result.output
+        self.assertTrue(output, '')
+
+'''
+class TestLicense(unittest.TestCase):
+
+    def setUp(self):
+        os.environ['RQDATAC2_CONF'] = "tcp://license:LgWjKyJl71S-PTXCdwEIlzKlU3Qqyn27gzPs6Xc1v7flJKPhIokNZCb0aoMg8PjaJYUPGfXBdyTkjve-53V7lySjvrNL9A94gf6ZpVv0XMum_2ebQkq2_KDDW2uhBHmsLkC7H2RgtTSAOJ1T3MBc0tRzh8-W5DJIxfSiFjfbrrk=iF1HruSX_Z3zYaJ77zAGh_4yr1PnL3AviSUGey8aDfOZI4MKIo4n2Bw9UtKPKviFTWqeOqYd0JAzClsXj5wvca_WA3hfHgA-4C8yibC9J2qjj1ZK4prXbw8FpgW5oRyUMYCC_0dCr13cJ8h6dx2Xwecg7RUCZVuUB-0cTLtgr4s=@rqdatad-pro.ricequant.com:16011"
+        os.environ['RQSDK_LICENSE'] = "tcp://license:LgWjKyJl71S-PTXCdwEIlzKlU3Qqyn27gzPs6Xc1v7flJKPhIokNZCb0aoMg8PjaJYUPGfXBdyTkjve-53V7lySjvrNL9A94gf6ZpVv0XMum_2ebQkq2_KDDW2uhBHmsLkC7H2RgtTSAOJ1T3MBc0tRzh8-W5DJIxfSiFjfbrrk=iF1HruSX_Z3zYaJ77zAGh_4yr1PnL3AviSUGey8aDfOZI4MKIo4n2Bw9UtKPKviFTWqeOqYd0JAzClsXj5wvca_WA3hfHgA-4C8yibC9J2qjj1ZK4prXbw8FpgW5oRyUMYCC_0dCr13cJ8h6dx2Xwecg7RUCZVuUB-0cTLtgr4s=@rqdatad-pro.ricequant.com:16011"
+
+    def test_info(self):
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.license, ["info"])
+        output = result.output
+        self.assertIn('剩余有效天数', output, "license info 提示错误")
+        output = result.output
+        self.assertIn('产品', output, "license info 提示错误")
+        self.assertIn('开启', output, "license info 提示错误")
+        self.assertIn('剩余有效天数', output, "license info 提示错误")
+
+        os.environ.pop('RQDATAC2_CONF')
+        os.environ.pop('RQSDK_LICENSE')
+        result = runner.invoke(yhsdk.cmds.license, ["info"])
+        output = result.output
+        self.assertIn('当前环境没有配置 license', output, "无license时 info 提示错误")
+
+        os.environ['RQSDK_LICENSE'] = "tcp://18670306315:12345678@rqdatad-pro.ricequant.com:16011"
+        result = runner.invoke(yhsdk.cmds.license, ["info"])
+        output = result.output
+        self.assertIn('LICENSE不可用', output, "license 设置错误时 info 提示错误")
+
+
+class TestConfig(unittest.TestCase):
+    def setUp(self):
+        if 'RQDATAC2_CONF' in os.environ:
+            os.environ.pop('RQDATAC2_CONF')
+        if 'RQSDK_LICENSE' in os.environ:
+            os.environ.pop('RQSDK_LICENSE')
+
+    
+    def test_set_rqdatac(self):
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.config,
+                               ["--rqdatac", "tcp://license:LgWjKyJl71S-PTXCdwEIlzKlU3Qqyn27gzPs6Xc1v7flJKPhIokNZCb0aoMg8PjaJYUPGfXBdyTkjve-53V7lySjvrNL9A94gf6ZpVv0XMum_2ebQkq2_KDDW2uhBHmsLkC7H2RgtTSAOJ1T3MBc0tRzh8-W5DJIxfSiFjfbrrk=iF1HruSX_Z3zYaJ77zAGh_4yr1PnL3AviSUGey8aDfOZI4MKIo4n2Bw9UtKPKviFTWqeOqYd0JAzClsXj5wvca_WA3hfHgA-4C8yibC9J2qjj1ZK4prXbw8FpgW5oRyUMYCC_0dCr13cJ8h6dx2Xwecg7RUCZVuUB-0cTLtgr4s=@rqdatad-pro.ricequant.com:16011"])
+        output = result.output
+        self.assertIn('当前 rqdatac license 已设置为', output, "设置rqdatac license")
+    
+    def test_show(self):
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.config, ["--show"])
+        output = result.output
+        self.assertEqual(output, "")
+    
+    def test_option_license(self):
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.license, ["-l", "license:LgWjKyJl71S-PTXCdwEIlzKlU3Qqyn27gzPs6Xc1v7flJKPhIokNZCb0aoMg8PjaJYUPGfXBdyTkjve-53V7lySjvrNL9A94gf6ZpVv0XMum_2ebQkq2_KDDW2uhBHmsLkC7H2RgtTSAOJ1T3MBc0tRzh8-W5DJIxfSiFjfbrrk=iF1HruSX_Z3zYaJ77zAGh_4yr1PnL3AviSUGey8aDfOZI4MKIo4n2Bw9UtKPKviFTWqeOqYd0JAzClsXj5wvca_WA3hfHgA-4C8yibC9J2qjj1ZK4prXbw8FpgW5oRyUMYCC_0dCr13cJ8h6dx2Xwecg7RUCZVuUB-0cTLtgr4s="])
+        output = result.output
+        self.assertIn('产品', output, "license info 提示错误")
+        self.assertIn('开启', output, "license info 提示错误")
+        self.assertIn('剩余有效天数', output, "license info 提示错误")
+    '''
+'''
+class TestVersion(unittest.TestCase):
+
+    def test_cli_version(self):
+        runner = CliRunner()
+        import deepquant.quest.sdk as yhsdk
+        result = runner.invoke(yhsdk.cmds.version, [])
+        text = result.output
+        print("text:",text)
+
+        self.assertIn("yhsdk", text, "yhsdk 不在version展示中")
+        self.assertIn("yhsdk==" + yhsdk.__version__, text, "未展示yhsdk版本")
+        self.assertIn("rqdatac==", text, "未展示rqdatac版本，rqdatac为必要包")
+'''
+'''
+
+class TestInstall(unittest.TestCase):
+
+    def setUp(self):
+        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+        warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+
+        def side_effect(*args):
+            print(*args)
+            return args
+
+        yhsdk.cmds.pip_install = Mock(side_effect=side_effect)
+
+    def test_install_with_error_product(self):
+        from deepquant.quest.sdk.const import PRODUCTS
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.install, ["rqdata"])
+        output = result.output
+        out_str = "请输入正确的产品名称".format(PRODUCTS, "rqdata")
+        self.assertIn(out_str, output, "产品参数错误提示错误")
+
+    def test_install_with_no_product(self):
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.install, [])
+        output = result.output
+        out_str = "请输入产品名称"
+        self.assertIn(out_str, output, "产品提示错误")
+
+    def test_install_with_right_product(self):
+        runner = CliRunner()
+        result = runner.invoke(yhsdk.cmds.install, ["yhalpha_plus"])
+        output = result.output
+        out_str = "yhsdk[yhalpha_plus]"
+        self.assertIn(out_str, output, "安装输入错误")
+
+'''
+
+import time
+
+import talib
+
+
+# 在这个方法中编写任何的初始化逻辑。context对象将会在你的算法策略的任何方法之间做传递。
+def init(context):
+    context.s1 = "000001.SZ"
+
+    # 设置这个策略当中会用到的参数，在策略中可以随时调用，这个策略使用长短均线，我们在这里设定长线和短线的区间，在调试寻找最佳区间的时候只需要在这里进行数值改动
+    context.SHORTPERIOD = 20
+    context.LONGPERIOD = 120
+    context.count = 0
+
+    print("init")
+
+
+def before_trading(context):
+    print("before_trading", context.count)
+    time.sleep(1)
+
+
+# 你选择的证券的数据更新将会触发此段逻辑，例如日或分钟历史数据切片或者是实时数据切片更新
+def handle_bar(context, bar_dict):
+    print("handle_bar", context.count)
+    context.count += 1
+
+    print(context.count, bar_dict["000001.SZ"].close_price)
+    print(context.count, bar_dict["000001.SH"].close_price)
+
+    print(current_snapshot("000001.SZ").last)
+    print(current_snapshot("000001.SH").last)
+
+    order_shares("000001.SZ", 100)
+    order_shares("000001.SZ", -100)
+    print(context.portfolio)
+    print(get_positions())
+
+
+def after_trading(context):
+    print("after_trading", context.count)
+
+from deepquant.quest.apis import *
+
+import numpy as np
+import talib
+import math
+
+
+def get_extreme(array_high_price_result, array_low_price_result):
+    np_array_high_price_result = np.array(array_high_price_result[:-1])
+    np_array_low_price_result = np.array(array_low_price_result[:-1])
+    max_result = np_array_high_price_result.max()
+    min_result = np_array_low_price_result.min()
+    return [max_result, min_result]
+
+
+def get_atr_and_unit(atr_array_result, atr_length_result, portfolio_value_result):
+    atr =  atr_array_result[atr_length_result-1]
+    unit = math.floor(portfolio_value_result * .01 / atr)
+    return [atr, unit]
+
+
+def get_stop_price(first_open_price_result, units_hold_result, atr_result):
+    stop_price = first_open_price_result - 2 * atr_result + (units_hold_result - 1) * 0.5 * atr_result
+    return stop_price
+
+
+def init(context):
+    context.trade_day_num = 0
+    context.unit = 0
+    context.atr = 0
+    context.trading_signal = 'start'
+    context.pre_trading_signal = ''
+    context.units_hold_max = 4
+    context.units_hold = 0
+    context.quantity = 0
+    context.max_add = 0
+    context.first_open_price = 0
+    context.s = '000300.SH'
+    context.open_observe_time = 55
+    context.close_observe_time = 20
+    context.atr_time = 20
+
+
+def handle_bar(context, bar_dict):
+    portfolio_value = context.portfolio.portfolio_value
+    high_price = history_bars(context.s, context.open_observe_time + 1, '1d', 'high')
+    low_price_for_atr = history_bars(context.s, context.open_observe_time + 1, '1d', 'low')
+    low_price_for_extreme = history_bars(context.s, context.close_observe_time + 1, '1d', 'low')
+    close_price = history_bars(context.s, context.open_observe_time + 2, '1d', 'close')
+    close_price_for_atr = close_price[:-1]
+
+    atr_array = talib.ATR(high_price, low_price_for_atr, close_price_for_atr, timeperiod=context.atr_time)
+
+    maxx = get_extreme(high_price, low_price_for_extreme)[0]
+    minn = get_extreme(high_price, low_price_for_extreme)[1]
+    atr = atr_array[-2]
+
+    if context.trading_signal != 'start':
+        if context.units_hold != 0:
+            context.max_add += 0.5 * get_atr_and_unit(atr_array, atr_array.size, portfolio_value)[0]
+    else:
+        context.max_add = bar_dict[context.s].last
+
+    cur_position = get_position(context.s).quantity
+    available_cash = context.portfolio.cash
+    market_value = context.portfolio.market_value
+
+    if (cur_position > 0 and
+            bar_dict[context.s].last < get_stop_price(context.first_open_price, context.units_hold, atr)):
+        context.trading_signal = 'stop'
+    else:
+        if cur_position > 0 and bar_dict[context.s].last < minn:
+            context.trading_signal = 'exit'
+        else:
+            if (bar_dict[context.s].last > context.max_add and context.units_hold != 0 and
+                    context.units_hold < context.units_hold_max and
+                    available_cash > bar_dict[context.s].last*context.unit):
+                context.trading_signal = 'entry_add'
+            else:
+                if bar_dict[context.s].last > maxx and context.units_hold == 0:
+                    context.max_add = bar_dict[context.s].last
+                    context.trading_signal = 'entry'
+
+    atr = get_atr_and_unit(atr_array, atr_array.size, portfolio_value)[0]
+    if context.trade_day_num % 5 == 0:
+        context.unit = get_atr_and_unit(atr_array, atr_array.size, portfolio_value)[1]
+    context.trade_day_num += 1
+    context.quantity = context.unit
+
+    if (context.trading_signal != context.pre_trading_signal or
+            (context.units_hold < context.units_hold_max and context.units_hold > 1) or
+            context.trading_signal == 'stop'):
+        if context.trading_signal == 'entry':
+            context.quantity = context.unit
+            if available_cash > bar_dict[context.s].last*context.quantity:
+                order_shares(context.s, context.quantity)
+                context.first_open_price = bar_dict[context.s].last
+                context.units_hold = 1
+
+        if context.trading_signal == 'entry_add':
+            context.quantity = context.unit
+            order_shares(context.s, context.quantity)
+            context.units_hold += 1
+
+        if context.trading_signal == 'stop':
+            if context.units_hold > 0:
+                order_shares(context.s, -context.quantity)
+                context.units_hold -= 1
+
+        if context.trading_signal == 'exit':
+            if cur_position > 0:
+                order_shares(context.s, -cur_position)
+                context.units_hold = 0
+
+    context.pre_trading_signal = context.trading_signal
+
+# encoding: utf-8
+from deepquant.quest.alpha.apis import *
+from deepquant.quest.datac.services.financial import *
+from deepquant.quest.datac.services.market_data import *
+import pandas as pd
+__config__ = {
+    "base": {
+        "data_bundle_path": "D:/sendData/ricequant/bundle",
+        "start_date": '2022-10-10',  # 回测起始日期
+        "end_date": '2022-10-11',  # 回测结束日期
+        'frequency': '1d',
+        "accounts": {
+            "stock": 10000000
+        },
+    },
+    "mod": {
+        "sys_analyser": {
+            # 策略基准，该基准将用于风险指标计算和收益曲线图绘制
+            #   若基准为单指数/股票，此处直接设置 order_book_id，如："000300.SH"
+            #   若基准为复合指数，则需传入 order_book_id 和权重构成的字符串，如："000300.SH:0.2,000905.SH:0.8"
+            "benchmark": '000001.SZ',
+            # 当不输出 csv/pickle/plot 等内容时，关闭该项可关闭策略运行过程中部分收集数据的逻辑，用以提升性能
+            "record": False,
+            # 策略名称，可设置 summary 报告中的 strategy_name 字段，并展示在 plot 回测结果图中
+            "strategy_name": 'mack.pickle',
+            # 回测结果输出的文件路径，该文件为 pickle 格式，内容为每日净值、头寸、流水及风险指标等；若不设置则不输出该文件
+            "output_file": '/output',
+            # 回测报告的数据目录，报告为 csv 格式；若不设置则不输出报告
+            "report_save_path": './backtest',
+            # 是否在回测结束后绘制收益曲线图
+            'plot': False,
+            # 收益曲线图路径，若设置则将收益曲线图保存为 png 文件
+            'plot_save_file': None,
+            # 收益曲线图设置
+            'plot_config': {
+                # 是否在收益图中展示买卖点
+                'open_close_points': False,
+                # 是否在收益图中展示周度指标和收益曲线
+                'weekly_indicators': False
+            },
+        },
+        "sys_accounts": {
+            # 是否开启股票 T+1 限制
+            "stock_t1": True,
+            # 是否开启自动分红再投资
+            "dividend_reinvestment": False,
+            # 当持仓股票退市时，是否按照退市价格返还现金
+            "cash_return_by_stock_delisted": True,
+            # 股票下单因资金不足被拒时改为使用全部剩余资金下单
+            "auto_switch_order_value": False,
+            # 开启对股票仓位是否能满足平仓需求的检查
+            "validate_stock_position": True,
+            # 开启对期货仓位是否能满足平仓需求的检查
+            "validate_future_position": True,
+            # 融资利率/年
+            "financing_rate": 0.00,
+            # 是否开启融资可买入股票的限制
+            "financing_stocks_restriction_enabled": False,
+            # 逐日盯市结算价: settlement/close
+            "futures_settlement_price_type": "close",
+        },
+        "sys_simulation": {
+            # 撮合方式，其中：
+            #   日回测的可选值为 "current_bar"|"vwap"（以当前 bar 收盘价｜成交量加权平均价撮合）
+            #   分钟回测的可选值有 "current_bar"|"next_bar"|"vwap"（以当前 bar 收盘价｜下一个 bar 的开盘价｜成交量加权平均价撮合)
+            #   tick 回测的可选值有 "last"|"best_own"|"best_counterparty"（以最新价｜己方最优价｜对手方最优价撮合）和 "counterparty_offer"（逐档撮合）
+            #   matching_type 为 None 则表示根据回测频率自动选择。日/分钟回测下为 current_bar , tick 回测下为 last
+            "matching_type": None,
+            # 开启对于处于涨跌停状态的证券的撮合限制
+            "price_limit": True,
+            # 开启对于对手盘无流动性的证券的撮合限制（仅在 tick 回测下生效）
+            "liquidity_limit": False,
+            # 开启成交量限制
+            #   开启该限制意味着每个 bar 的累计成交量将不会超过该时间段内市场上总成交量的一定比值（volume_percent）
+            #   开启该限制意味着每个 tick 的累计成交量将不会超过当前tick与上一个tick的市场总成交量之差的一定比值
+            "volume_limit": False,
+            # 每个 bar/tick 可成交数量占市场总成交量的比值，在 volume_limit 开启时生效
+            "volume_percent": 0.25,
+            # 滑点模型，可选值有 "PriceRatioSlippage"（按价格比例设置滑点）和 "TickSizeSlippage"（按跳设置滑点）
+            #    亦可自己实现滑点模型，选择自己实现的滑点模型时，此处需传入包含包和模块的完整类路径
+            #    滑点模型类需继承自 yhalpha.mod.mod_sys_simulation.slippage.BaseSlippage
+            "slippage_model": "PriceRatioSlippage",
+            # 设置滑点值，对于 PriceRatioSlippage 表示价格的比例，对于 TickSizeSlippage 表示跳的数量
+            "slippage": 0.001,
+        },
+        # 费用模块，该模块的配置项用于调整交易的税费
+        "sys_transaction_cost": {
+            # 股票最小手续费，单位元
+            "cn_stock_min_commission": 5,
+            # 股票佣金倍率,即在默认的手续费率基础上按该倍数进行调整，股票的默认佣金为万八
+            "stock_commission_multiplier": 1,
+            # 期货佣金倍率,即在默认的手续费率基础上按该倍数进行调整，期货默认佣金因合约而异
+            "futures_commission_multiplier": 1,
+            # 印花倍率，即在默认的印花税基础上按该倍数进行调整，股票默认印花税为万分之五，单边收取
+            "tax_multiplier": 1,
+            # 是否使用回测当时时间点对应的真实印花税率
+            "pit_tax": False,
+        },
+        "option" : {
+            "enabled" : False
+        },
+        "convertible" : {
+            "enabled" : False
+        },
+        "spot" : {
+            "enabled" : False
+        },
+        "fund" : {
+            "enabled" : False
+        },
+    },
+    "extra": {
+        # 系统日志级别，用于控制策略框架输出日志的详细程度（策略打印的日志不受该选项控制），设置为某一级别则框架会输出该级别及更"严重"的日志
+        # 可选值："debug"|"info"|"warning"|"error"，通常推荐设置为 info 或 warning
+        # error 日志一般为不可逆的错误，如策略抛出异常、加载 Mod 失败等
+        # warning 日志一般为告警信息，如 API 废弃、订单创建失败等
+        # info 日志一般为说明性的信息，如 Mod 在某种设置下被动关闭等
+        # debug 日志一般为开发者关注的调试信息，如策略状态变更、事件触发等，用户通常不需要关注
+        "log_level": "info",
+        # 是否开启性能分析
+        "enable_profiler": False,
+        # 输出的日志文件路径
+        "log_file": None,
+    }
+}
+def init(context):
+    # 设置沪深300指数作为标的
+    #context.s1 = "000001.SH"
+    context.order_book_ids = ['000001.SZ']
+    # 设置MACD参数
+    context.short = 12
+    context.long = 26
+    context.m = 9
+    # 订阅数据
+    subscribe(context.order_book_ids[0])
+
+def handle_bar(context, bar_dict):
+    # 获取历史数据
+    #price_df = history_bars(context.order_book_ids[0], 10, frequency="1d")  # 历史数据的拉取
+    prices = history_bars(context.order_book_ids[0], context.long + context.m, frequency="1d",fields="close_price")
+
+    p = pd.Series(prices)
+    # 计算EMA
+    #short_ema = prices[-context.short:].mean()
+    short_ema = p.ewm(span=context.short, adjust=False).mean()
+    #long_ema = prices[-context.long:].mean()
+    long_ema = p.ewm(span=context.long, adjust=False).mean()
+    # 计算MACD和信号线
+    macd = short_ema - long_ema
+    # s = pd.Series(macd)
+    signal = macd.ewm(span=context.m, adjust=False).mean()
+    
+    # 获取当前持仓
+    cur_position = context.portfolio.positions[context.order_book_ids[0]].quantity
+
+    print(macd.iloc[-1])
+    # 交易逻辑
+    if macd.iloc[-1] > signal.iloc[-1] and macd.iloc[-2] <= signal.iloc[-2] and cur_position == 0:
+        # 买入信号
+        print('买入')
+        order_target_percent(context.order_book_ids[0], 0.1)
+    elif macd.iloc[-1] < signal.iloc[-1] and macd.iloc[-2] >= signal.iloc[-2] and cur_position > 0:
+        # 卖出信号
+        print('卖出')
+        order_target_percent(context.order_book_ids[0], 0)
+
+def before_trading(context):
+    #prices = history_bars(context.order_book_ids[0], context.long + context.m, '1d')
+    pass
+
+def after_trading(context):
+    pass
+
+if __name__ == '__main__':
+    from deepquant.quest.alpha import run_func
+
+    data = run_func(init=init, before_trading=before_trading, after_trading=after_trading, handle_bar=handle_bar,
+                    config=__config__)
+# encoding: utf-8
+from deepquant.quest.alpha.apis import *
+
+
+__config__ = {
+    "base": {
+        "data_bundle_path": "D:/sendData/ricequant/bundle",
+        "start_date": '2024-07-01 09:30:00',  # 回测起始日期
+        "end_date": '2024-07-04 15:00:00',  # 回测结束日期
+        'frequency': 'tick',
+        "accounts": {
+            "stock": 10000000
+        },
+    },
+     "mod": {
+
+         "sys_analyser": {
+             # 策略基准，该基准将用于风险指标计算和收益曲线图绘制
+             #   若基准为单指数/股票，此处直接设置 order_book_id，如："000300.SH"
+             #   若基准为复合指数，则需传入 order_book_id 和权重构成的字符串，如："000300.SH:0.2,000905.SH:0.8"
+             "benchmark": None,
+             # 当不输出 csv/pickle/plot 等内容时，关闭该项可关闭策略运行过程中部分收集数据的逻辑，用以提升性能
+             "record": False,
+             # 策略名称，可设置 summary 报告中的 strategy_name 字段，并展示在 plot 回测结果图中
+             "strategy_name": 'mack.pickle',
+             # 回测结果输出的文件路径，该文件为 pickle 格式，内容为每日净值、头寸、流水及风险指标等；若不设置则不输出该文件
+             "output_file": '/output',
+             # 回测报告的数据目录，报告为 csv 格式；若不设置则不输出报告
+             "report_save_path": './backtest',
+             # 是否在回测结束后绘制收益曲线图
+             'plot': False,
+             # 收益曲线图路径，若设置则将收益曲线图保存为 png 文件
+             'plot_save_file': None,
+             # 收益曲线图设置
+             'plot_config': {
+                 # 是否在收益图中展示买卖点
+                 'open_close_points': False,
+                 # 是否在收益图中展示周度指标和收益曲线
+                 'weekly_indicators': False
+             },
+         },
+        "option" : {
+            "enabled" : False
+        },
+        "convertible" : {
+            "enabled" : False
+        },
+        "spot" : {
+            "enabled" : False
+        },
+        "fund" : {
+            "enabled" : False
+        },
+  }
+}
+
+
+def init(context):
+    # 定义标
+    # CS ETF Convertible Future option
+    context.market_code = ['000002.SZ']
+    subscribe(context.market_code)  # 订阅行情
+
+
+# 盘前处理
+def before_trading(context):
+    pass
+
+def handle_tick(context, tick):
+    print("handle_tick.....", str(tick))
+    # print(tick.market_code)
+   #order_target_value(tick.market_code, 100)
+
+
+# 盘后处理
+def after_trading(context):
+    pass
+
+
+if __name__ == '__main__':
+    from deepquant.quest.alpha import run_func
+    data = run_func(init=init, before_trading=before_trading, after_trading=after_trading, handle_tick=handle_tick, config=__config__)
+
